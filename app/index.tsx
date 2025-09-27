@@ -2,24 +2,27 @@ import { SnackCard } from "#/components";
 import { ICONS } from "#/constants/icons";
 import { SNACK_DATA, SnackItem } from "#/data/snacks";
 import { COLOR, FONT, SPACING } from "#/theme";
-import {
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Index() {
+  // Shared value to track scroll position
+  const scrollX = useSharedValue(0);
+
+  // Animated scroll handler
+  const scrollHandler = useAnimatedScrollHandler({
+    onScroll: (event) => {
+      scrollX.value = event.contentOffset.x;
+    },
+  });
+
   const handleSnackPress = (item: SnackItem) => {
     console.log("Snack pressed:", item.title);
   };
-
-  const renderSnackCard = ({ item }: { item: SnackItem }) => (
-    <SnackCard item={item} onPress={handleSnackPress} />
-  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -35,18 +38,30 @@ export default function Index() {
       </View>
 
       <View style={styles.snackSection}>
-        <Text style={styles.sectionTitle}>
+        {/* <Text style={styles.sectionTitle}>
           Choco <Text style={styles.sectionTitleAccent}>Collections</Text>
-        </Text>
+        </Text> */}
 
-        <FlatList
+        <Animated.FlatList
           data={SNACK_DATA}
-          renderItem={renderSnackCard}
+          renderItem={({ item, index }) => (
+            <SnackCard
+              item={item}
+              index={index}
+              scrollX={scrollX}
+              onPress={handleSnackPress}
+            />
+          )}
           keyExtractor={(item) => item.id}
           horizontal
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.snackList}
           style={styles.snackListContainer}
+          onScroll={scrollHandler}
+          scrollEventThrottle={16}
+          decelerationRate="fast"
+          snapToInterval={336 + 16} // Card width + spacing
+          snapToAlignment="start"
         />
       </View>
     </SafeAreaView>
@@ -104,7 +119,8 @@ const styles = StyleSheet.create({
 
   // Snack list styles
   snackListContainer: {
-    marginTop: SPACING[5],
+    // marginTop: SPACING[5],
+    paddingVertical: SPACING[5],
   },
   snackList: {
     paddingRight: SPACING[5],

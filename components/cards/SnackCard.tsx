@@ -8,44 +8,122 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import Animated, {
+  Extrapolation,
+  interpolate,
+  SharedValue,
+  useAnimatedStyle,
+  withSpring,
+} from "react-native-reanimated";
+
+const CARD_WIDTH = 336;
+const CARD_SPACING = 16;
 
 interface SnackCardProps {
   item: SnackItem;
+  index: number;
+  scrollX: SharedValue<number>;
   onPress?: (item: SnackItem) => void;
 }
 
-export default function SnackCard({ item, onPress }: SnackCardProps) {
+export default function SnackCard({
+  item,
+  index,
+  scrollX,
+  onPress,
+}: SnackCardProps) {
   const handlePress = () => {
     onPress?.(item);
   };
 
+  // Calculate the input range for this card
+  const inputRange = [
+    (index - 1) * (CARD_WIDTH + CARD_SPACING),
+    index * (CARD_WIDTH + CARD_SPACING),
+    (index + 1) * (CARD_WIDTH + CARD_SPACING),
+  ];
+
+  // Animated style for the card container
+  const animatedStyle = useAnimatedStyle(() => {
+    // Rotation animation - cards start tilted and straighten when centered
+    const rotation = interpolate(
+      scrollX.value,
+      inputRange,
+      [index === 0 ? 0 : -15, 0, 15], // First card doesn't tilt initially
+      Extrapolation.CLAMP
+    );
+
+    // Scale animation - cards scale up slightly when centered
+    const scale = interpolate(
+      scrollX.value,
+      inputRange,
+      [0.95, 1, 0.95],
+      Extrapolation.CLAMP
+    );
+
+    // Translation animation for overlapping effect
+    const translateX = interpolate(
+      scrollX.value,
+      inputRange,
+      [index === 0 ? 0 : -60, 0, -60], // First card doesn't translate initially
+      Extrapolation.CLAMP
+    );
+
+    // Z-index effect using elevation simulation
+    const elevation = interpolate(
+      scrollX.value,
+      inputRange,
+      [1, 5, 1],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      transform: [
+        { translateX: withSpring(translateX, { damping: 20, stiffness: 90 }) },
+        { scale: withSpring(scale, { damping: 15, stiffness: 100 }) },
+        {
+          rotateZ: withSpring(`${rotation}deg`, {
+            damping: 105,
+            stiffness: 80,
+          }),
+        },
+      ],
+      elevation,
+      zIndex: Math.round(elevation),
+    };
+  }, [index]);
+
   return (
-    <TouchableOpacity
-      style={[styles.card, { backgroundColor: item.backgroundColor }]}
-      onPress={handlePress}
-      activeOpacity={0.8}
+    <Animated.View
+      style={[animatedStyle, { marginRight: index === 0 ? CARD_SPACING : 0 }]}
     >
-      <View style={styles.cardContent}>
-        <Text style={styles.cardTitle}>{item.title}</Text>
+      <TouchableOpacity
+        style={[styles.card, { backgroundColor: item.backgroundColor }]}
+        onPress={handlePress}
+        activeOpacity={0.8}
+      >
+        <View style={styles.cardContent}>
+          <Text style={styles.cardTitle}>{item.title}</Text>
 
-        <View style={styles.categoryTag}>
-          <Text
-            style={styles.categoryTagText}
-            numberOfLines={1}
-            ellipsizeMode="tail"
-          >
-            {item.category}
-          </Text>
+          <View style={styles.categoryTag}>
+            <Text
+              style={styles.categoryTagText}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+            >
+              {item.category}
+            </Text>
+          </View>
         </View>
-      </View>
 
-      <ImageBackground source={item.image} style={styles.productImage} />
+        <ImageBackground source={item.image} style={styles.productImage} />
 
-      <BlurView style={styles.priceContainer} intensity={100}>
-        <Text style={styles.priceText}>$ {item.price.toFixed(2)}</Text>
-        <View></View>
-      </BlurView>
-    </TouchableOpacity>
+        <BlurView style={styles.priceContainer} intensity={100}>
+          <Text style={styles.priceText}>$ {item.price.toFixed(2)}</Text>
+          <View></View>
+        </BlurView>
+      </TouchableOpacity>
+    </Animated.View>
   );
 }
 
