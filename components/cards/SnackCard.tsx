@@ -1,7 +1,9 @@
+import { ICONS } from "#/constants/icons";
 import { SnackItem } from "#/data/snacks";
 import { COLOR, FONT, RADIUS, SHADOW, SPACING } from "#/theme";
 import { BlurView } from "expo-blur";
 import {
+  Image,
   ImageBackground,
   StyleSheet,
   Text,
@@ -120,7 +122,13 @@ export default function SnackCard({
 
         <BlurView style={styles.priceContainer} intensity={100}>
           <Text style={styles.priceText}>$ {item.price.toFixed(2)}</Text>
-          <View></View>
+          <View style={styles.priceBtn}>
+            <Image
+              source={ICONS.bag}
+              style={styles.priceBtnIcon}
+              tintColor={COLOR.white}
+            />
+          </View>
         </BlurView>
       </TouchableOpacity>
     </Animated.View>
@@ -173,12 +181,13 @@ const styles = StyleSheet.create({
   },
   priceContainer: {
     overflow: "hidden",
-    padding: SPACING[5],
+    padding: SPACING[1],
     borderWidth: 2,
     borderColor: COLOR.light[100],
     borderRadius: RADIUS["3xl"] * 2,
     width: "90%",
     alignSelf: "center",
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     position: "absolute",
@@ -188,5 +197,18 @@ const styles = StyleSheet.create({
     fontFamily: FONT.families.extraBold,
     fontSize: FONT.sizes.lg,
     color: COLOR.black,
+    marginLeft: SPACING[5],
+  },
+  priceBtn: {
+    backgroundColor: COLOR.black,
+    height: 55,
+    width: 76,
+    borderRadius: 100,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  priceBtnIcon: {
+    width: 27,
+    height: 27,
   },
 });
