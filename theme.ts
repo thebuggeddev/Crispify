@@ -1,6 +1,8 @@
 export const COLOR = {
+  primary: "#FFEC89",
   light: {
     100: "#F3F3F3",
+    200: "rgba(255, 255, 255, 0.4)",
   },
   dark: {
     100: "rgba(0,0,0, 0.5)",

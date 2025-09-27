@@ -1,4 +1,5 @@
 import { SnackCard } from "#/components";
+import CartInfo from "#/components/CartInfo";
 import { ICONS } from "#/constants/icons";
 import { SNACK_DATA, SnackItem } from "#/data/snacks";
 import { COLOR, FONT, SPACING } from "#/theme";
@@ -64,6 +65,8 @@ export default function Index() {
           snapToAlignment="start"
         />
       </View>
+
+      <CartInfo />
     </SafeAreaView>
   );
 }
@@ -74,6 +77,7 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: SPACING[5],
     backgroundColor: COLOR.white,
+    position: "relative",
   },
 
   // Header styles
