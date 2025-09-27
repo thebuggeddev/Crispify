@@ -49,7 +49,7 @@ export default function SnackCard({
     const rotation = interpolate(
       scrollX.value,
       inputRange,
-      [index === 0 ? 0 : -15, 0, 15], // First card doesn't tilt initially
+      [-15, 0, 15], // All cards follow the same rotation pattern
       Extrapolation.CLAMP
     );
 
@@ -61,11 +61,13 @@ export default function SnackCard({
       Extrapolation.CLAMP
     );
 
-    // Translation animation for overlapping effect
+    // Translation animation - all cards should have consistent positioning
+    // When a card becomes active (centered), it should be at translateX: 0
+    // When not active, cards should be positioned for the overlapping effect
     const translateX = interpolate(
       scrollX.value,
       inputRange,
-      [index === 0 ? 0 : -60, 0, -60], // First card doesn't translate initially
+      [-60, 0, -60], // Consistent translation pattern for all cards
       Extrapolation.CLAMP
     );
 
@@ -94,9 +96,7 @@ export default function SnackCard({
   }, [index]);
 
   return (
-    <Animated.View
-      style={[animatedStyle, { marginRight: index === 0 ? CARD_SPACING : 0 }]}
-    >
+    <Animated.View style={animatedStyle}>
       <TouchableOpacity
         style={[styles.card, { backgroundColor: item.backgroundColor }]}
         onPress={handlePress}
@@ -129,12 +129,12 @@ export default function SnackCard({
 
 const styles = StyleSheet.create({
   card: {
-    width: 336,
+    width: CARD_WIDTH,
     height: 422,
     borderRadius: 40,
     overflow: "hidden",
     position: "relative",
-    marginRight: SPACING[4],
+    marginRight: CARD_SPACING,
   },
   cardContent: {
     padding: SPACING[7],
